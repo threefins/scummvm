@@ -218,11 +218,11 @@ public:
 	Archive *openArchive(const Common::Path &movie);
 	void addArchiveToOpenList(const Common::Path &path);
 	Archive *loadEXE(const Common::Path &movie);
-	Archive *loadEXEv3(Common::SeekableReadStream *stream);
-	Archive *loadEXEv4(Common::SeekableReadStream *stream);
-	Archive *loadEXEv5(Common::SeekableReadStream *stream);
-	Archive *loadEXEv7(Common::SeekableReadStream *stream);
-	Archive *loadEXERIFX(Common::SeekableReadStream *stream, uint32 offset);
+	Archive *loadEXEv3(Common::SeekableReadStream *stream, const Common::Path &movie);
+	Archive *loadEXEv4(Common::SeekableReadStream *stream, const Common::Path &movie);
+	Archive *loadEXEv5(Common::SeekableReadStream *stream, const Common::Path &movie);
+	Archive *loadEXEv7(Common::SeekableReadStream *stream, const Common::Path &movie);
+	Archive *loadEXERIFX(Common::SeekableReadStream *stream, uint32 offset, const Common::Path &movie);
 	Archive *loadMac(const Common::Path &movie);
 
 	bool desktopEnabled();

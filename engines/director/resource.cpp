@@ -276,7 +276,7 @@ Archive *DirectorEngine::loadEXE(const Common::Path &movie) {
 	uint32 initialTag = exeStream->readUint32LE();
 	if (initialTag == MKTAG('R', 'I', 'F', 'X') || initialTag == MKTAG('X', 'F', 'I', 'R')) {
 		// we've encountered a movie saved from Director, not a projector.
-		result = loadEXERIFX(exeStream, 0);
+		result = loadEXERIFX(exeStream, 0, movie);
 	} else if (initialTag == MKTAG('R', 'I', 'F', 'F') || initialTag == MKTAG('F', 'F', 'I', 'R')) { // This is just a normal movie
 		result = new RIFFArchive();
 
@@ -316,13 +316,13 @@ Archive *DirectorEngine::loadEXE(const Common::Path &movie) {
 		exeStream->seek(exeStream->readUint32LE());
 
 		if (g_director->getVersion() >= 700) {
-			result = loadEXEv7(exeStream);
+			result = loadEXEv7(exeStream,movie);
 		} else if (g_director->getVersion() >= 500) {
-			result = loadEXEv5(exeStream);
+			result = loadEXEv5(exeStream,movie);
 		} else if (g_director->getVersion() >= 400) {
-			result = loadEXEv4(exeStream);
+			result = loadEXEv4(exeStream,movie);
 		} else if (g_director->getVersion() >= 200) {
-			result = loadEXEv3(exeStream);
+			result = loadEXEv3(exeStream,movie);
 		} else {
 			warning("DirectorEngine::loadEXE(): Unhandled Windows EXE version %d", g_director->getVersion());
 			delete exeStream;
@@ -344,7 +344,7 @@ Archive *DirectorEngine::loadEXE(const Common::Path &movie) {
 	return result;
 }
 
-Archive *DirectorEngine::loadEXEv3(Common::SeekableReadStream *stream) {
+Archive *DirectorEngine::loadEXEv3(Common::SeekableReadStream *stream, const Common::Path &movie) {
 	uint32 mmmSize = 0;
 	Common::String mmmFileName;
 	Common::String directoryName;
@@ -436,7 +436,7 @@ Archive *DirectorEngine::loadEXEv3(Common::SeekableReadStream *stream) {
 	return result;
 }
 
-Archive *DirectorEngine::loadEXEv4(Common::SeekableReadStream *stream) {
+Archive *DirectorEngine::loadEXEv4(Common::SeekableReadStream *stream, const Common::Path &movie) {
 	uint32 ver = stream->readUint32BE();
 
 	if (ver != MKTAG('P', 'J', '9', '3')) {
@@ -456,10 +456,10 @@ Archive *DirectorEngine::loadEXEv4(Common::SeekableReadStream *stream) {
 
 	warning("DirectorEngine::loadEXEv4(): PJ93 projector flags: %08x", flags);
 
-	return loadEXERIFX(stream, rifxOffset);
+	return loadEXERIFX(stream, rifxOffset, movie);
 }
 
-Archive *DirectorEngine::loadEXEv5(Common::SeekableReadStream *stream) {
+Archive *DirectorEngine::loadEXEv5(Common::SeekableReadStream *stream, const Common::Path &movie) {
 	uint32 ver = stream->readUint32LE();
 
 	if (ver != MKTAG('P', 'J', '9', '5')) {
@@ -481,10 +481,10 @@ Archive *DirectorEngine::loadEXEv5(Common::SeekableReadStream *stream) {
 
 	warning("DirectorEngine::loadEXEv5(): PJ95 projector pflags: %08x  flags: %08x", pflags, flags);
 
-	return loadEXERIFX(stream, rifxOffset);
+	return loadEXERIFX(stream, rifxOffset,movie);
 }
 
-Archive *DirectorEngine::loadEXEv7(Common::SeekableReadStream *stream) {
+Archive *DirectorEngine::loadEXEv7(Common::SeekableReadStream *stream, const Common::Path &movie) {
 	uint32 ver = stream->readUint32LE();
 
 	if (ver != MKTAG('P', 'J', '0', '0') && ver != MKTAG('P', 'J', '0', '1')) {
@@ -500,13 +500,14 @@ Archive *DirectorEngine::loadEXEv7(Common::SeekableReadStream *stream) {
 	stream->readUint32LE(); // unknown
 	stream->readUint32LE(); // some DLL offset
 
-	return loadEXERIFX(stream, rifxOffset);
+	return loadEXERIFX(stream, rifxOffset, movie);
 }
 
-Archive *DirectorEngine::loadEXERIFX(Common::SeekableReadStream *stream, uint32 offset) {
+Archive *DirectorEngine::loadEXERIFX(Common::SeekableReadStream *stream, uint32 offset, const Common::Path &movie) {
 	Archive *result = new RIFXArchive();
+	result->setPathName(movie);
 
-	if (!result->openStream(stream, offset)) {
+	if (!result->openStream(stream, offset)){
 		warning("DirectorEngine::loadEXERIFX(): Failed to load RIFX from EXE");
 		delete result;
 		result = nullptr;
