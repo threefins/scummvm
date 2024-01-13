@@ -74,6 +74,7 @@ static const PlainGameDescriptor directorGames[] = {
 	{ "barbpauper",			"Barbie as the Princess and the Pauper" },
 	{ "barbrapunzel",		"Barbie as Rapunzel: A Creative Adventure" },
 	{ "barbswanlake",		"Barbie of Swan Lake: The Enchanted Forest" },
+	{ "barbmagichouse", "Barbie and her Magical House"},
 	{ "bbbighelpers",		"Little Bears Make Big Helpers: Life's Little Lessons with the Berenstain Bears" },
 	{ "bearfamily",			"A Bear Family Adventure" },
 	{ "beautyorbeast",		"Beauty or the Beast" },
@@ -8942,6 +8943,8 @@ static const DirectorGameDescription gameDescriptions[] = {
 
 	WINGAME1_l("barbswanlake", "", "SwanLake.exe", "310659620631c126edb6943af1f83e38", 4096651, Common::FR_FRA, 900),
 	WINDEMO1("barbswanlake", "Demo", "SwanLake.exe", "c612aa43e7ef55aa4fd2e1085fb1ef7a", 2385166, 900),
+
+	WINGAME1("barbmagichouse", "", "BARBIE.exe", "11d4eb5c3a76fcb30dadca36ad9d2760", 909919, 400),
 
 	WINGAME1_l("bpapao", "", "bpapao.exe", "c612aa43e7ef55aa4fd2e1085fb1ef7a", 4829907, Common::PT_BRA, 900),
 
