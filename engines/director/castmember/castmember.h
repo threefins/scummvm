@@ -136,6 +136,7 @@ struct CastMemberInfo {
 	EditInfo textEditInfo;
 	Common::String modifiedBy;
 	Common::String comments;
+	uint32 flags;
 
 	CastMemberInfo() : autoHilite(false), scriptId(0) {}
 };

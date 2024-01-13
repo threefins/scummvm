@@ -90,16 +90,29 @@ void SoundCastMember::load() {
 			warning("Sound::load(): no resource or info found for cast member %d, skipping", _castId);
 		}
 	} else {
-		debugC(2, kDebugLoading, "****** Loading '%s' id: %d, %d bytes", tag2str(tag), sndId, (int)sndData->size());
+		CastMemberInfo* castInfo = getInfo();
+		debugC(2, kDebugLoading, "****** Loading '%s' id: %d, %d bytes, version %d, flags  0x%08x", tag2str(tag), sndId, (int)sndData->size(), _cast->_version,castInfo->flags);
 		SNDDecoder *audio = new SNDDecoder();
 		audio->loadStream(*sndData);
 		_audio = audio;
 		_size = sndData->size();
+
 		if (_cast->_version < kFileVer400) {
-			// The looping flag wasn't added to sound cast members until D4.
+			debugC(9,kDebugLoading,"****** Loading id: %d Using audio loop bounds to determine looping as cast version %d is less than %d",sndId, _cast->_version, kFileVer400);
+			// Thelooping flag wasn't added to sound cast members until D4.
 			// In older versions, always loop sounds that contain a loop start and end.
 			_looping = audio->hasLoopBounds();
+		 }
+
+		if (_cast->_version >= kFileVer400 && _cast->_version < kFileVer600) {
+			debugC(9,kDebugLoading,"****** Loading id %d, processing cast info flags 0x%08x  to determine looping behaviour", sndId, castInfo->flags);
+			_looping = castInfo->flags & 16 ? 0 : 1;
+		} else if (_cast->_version >= kFileVer600) {
+			warning("STUB: SoundCastMember::load() Sound cast member info not yet supported for version %d", _cast->_version);
 		}
+
+		debugC(2, kDebugLoading, "****** Loaded '%s' id: %d, %d bytes VERSION %d, looping: %d ", tag2str(tag), sndId, (int)sndData->size(), _cast->_version, _looping);
+
 	}
 	if (sndData)
 		delete sndData;
