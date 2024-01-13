@@ -97,8 +97,10 @@ void SoundCastMember::load() {
 		_audio = audio;
 		_size = sndData->size();
 
-
-		if (_cast->_version < kFileVer400) {
+		// Seems as if vesion 400 files can haave 0 flags but still not be looped
+		//FileVer earliestVersionWithFlagsSupported = kFileVer400;
+		FileVer earliestVersionWithFlagsSupported = kFileVer404;
+		if (_cast->_version < earliestVersionWithFlagsSupported) {
 			debugC(9,kDebugLoading,"****** Loading id: %d Using audio loop bounds to determine looping as cast version %d is less than %d",sndId, _cast->_version, kFileVer400);
 			// Thelooping flag wasn't added to sound cast members until D4.
 			// In older versions, always loop sounds that contain a loop start and end.
