@@ -85,6 +85,7 @@ enum {
 	kDebugConsole		= 1 << 20,
 	kDebugXObj			= 1 << 21,
 	kDebugLingoThe		= 1 << 22,
+	kDebugNoFramePosCache = 1 << 23,
 };
 
 enum {

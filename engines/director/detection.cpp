@@ -73,6 +73,7 @@ static const DebugChannelDef debugFlagList[] = {
 	{Director::kDebugText, "text", "Text rendering"},
 	{Director::kDebugXObj, "xobj", "XObjects"},
 	{Director::kDebugLingoThe, "lingothe", "Lingo \"the\" entities"},
+	{Director::kDebugNoFramePosCache, "noframeposcache", "Disable frame pos cache position loading"},
 	DEBUG_CHANNEL_END
 };
 

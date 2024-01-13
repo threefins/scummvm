@@ -185,6 +185,10 @@ void DirectorSound::playCastMember(CastMemberID memberID, uint8 soundChannel, bo
 					// We don't want to stop it if this channel's cast member changes to 0.
 					stopOnZero = false;
 				}
+					if(memberID.member==29){
+						//HACK!
+						stopOnZero = false;
+					}
 
 				AudioDecoder *ad = ((SoundCastMember *)soundCast)->_audio;
 				if (!ad) {

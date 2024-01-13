@@ -53,6 +53,7 @@ void Frame::reset() {
 	}
 }
 
+
 Frame::Frame(const Frame &frame) {
 	_vm = frame._vm;
 	_numChannels = frame._numChannels;

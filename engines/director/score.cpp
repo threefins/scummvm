@@ -1480,11 +1480,21 @@ bool Score::loadFrame(int frameNum, bool loadCast) {
 	debugC(7, kDebugLoading, "****** Frame request %d, current pos: %ld, current frame number: %d", frameNum, _framesStream->pos(), _curFrameNumber);
 	int sourceFrame = _curFrameNumber;
 	int targetFrame = frameNum;
-	if(targetFrame> 50 && _cachedFrameOffsets[targetFrame]>0){
+
+	if(!debugChannelSet(-1, kDebugNoFramePosCache) && targetFrame> 0 && _cachedFrameOffsets[targetFrame]>0){
+		// pseudo reset hack
+		if(targetFrame!=(1+sourceFrame)){
+		_currentFrame->_mainChannels.actionId = CastMemberID(0, 0);
+		}
 		uint cachedFrameOffset = _cachedFrameOffsets[targetFrame];
 		if(_framesStream->pos()!=cachedFrameOffset){
 
-		debugC(7, kDebugLoading, "****** Seeking to cached frame offset for request %d, current pos: %ld, cached frame offset: %d", sourceFrame, _framesStream->pos(), cachedFrameOffset);
+		debugC(7, kDebugLoading, "****** Seeking to cached frame offset for request %d, current pos: %ld, cached frame offset: %d", targetFrame, _framesStream->pos(), cachedFrameOffset);
+		for (uint16 i = 0; i < _currentFrame->_sprites.size(); i++) {
+		if (_currentFrame->_sprites[i]) {
+			//_currentFrame->_sprites[i]->_puppet= false;
+	    }
+	}
 		_framesStream->seek(cachedFrameOffset);
 		}
 	} else {
@@ -1500,7 +1510,7 @@ bool Score::loadFrame(int frameNum, bool loadCast) {
 			_framesStream->seek(_firstFramePosition);
 		}
 		debugC(7, kDebugLoading, "****** Source frame %d to Destination frame %d, current offset %ld", sourceFrame, targetFrame, _framesStream->pos());
-		while (sourceFrame < targetFrame - 1 && readOneFrame()) {
+		while (sourceFrame < targetFrame - 1 && readOneFrame(sourceFrame)) {
 			sourceFrame++;
 		}
 		// we know that the next frame is supposed to be the target frame so let's save that piece of information
@@ -1511,7 +1521,7 @@ bool Score::loadFrame(int frameNum, bool loadCast) {
 
 
 	// Finally read the target frame!
-	bool isFrameRead = readOneFrame();
+	bool isFrameRead = readOneFrame(targetFrame);
 	if (!isFrameRead)
 		return false;
 
@@ -1523,10 +1533,15 @@ bool Score::loadFrame(int frameNum, bool loadCast) {
 		setSpriteCasts();
 	}
 
+	// this is prob *not* the right thing to do but was what was happening when loaadaing all the frames all the time i believe
+	if(_currentFrame->_mainChannels.tempo == 13){
+		warning("HACK - resetting tempo to be like before");
+		_currentFrame->_mainChannels.tempo  = 0;
+	}
 	return true;
 }
 
-bool Score::readOneFrame() {
+bool Score::readOneFrame(int targetFrame) {
 	uint16 channelSize;
 	uint16 channelOffset;
 
@@ -1536,7 +1551,7 @@ bool Score::readOneFrame() {
 	uint16 frameSize = _framesStream->readUint16();
 	assert(frameSize < _framesStreamSize);
 
-	debugC(3, kDebugLoading, "++++++++++ score load frame %d (frameSize %d) saveOffset", _curFrameNumber, frameSize);
+	debugC(3, kDebugLoading, "++++++++++ score load frame %d (frameSize %d) saveOffset",targetFrame, frameSize);
 	if (debugChannelSet(8, kDebugLoading)) {
 		_framesStream->hexdump(MAX(0, frameSize - 2));
 	}
@@ -1562,7 +1577,7 @@ bool Score::readOneFrame() {
 			debugC(4, kDebugLoading, "%s", _currentFrame->formatChannelInfo().c_str());
 		}
 
-		debugC(8, kDebugLoading, "Score::readOneFrame(): Frame %d actionId: %s", _curFrameNumber, _currentFrame->_mainChannels.actionId.asString().c_str());
+		debugC(8, kDebugLoading, "Score::readOneFrame(): Frame %d actionId: %s", targetFrame, _currentFrame->_mainChannels.actionId.asString().c_str());
 		return true;
 	} else {
 		warning("Score::readOneFrame(): Zero sized frame!? exiting loop until we know what to do with the tags that follow.");
