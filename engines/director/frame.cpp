@@ -550,7 +550,9 @@ void Frame::readSpriteD4(Common::MemoryReadStreamEndian &stream, uint16 offset, 
 
 	Sprite &sprite = *_sprites[spritePosition + 1];
 
-	if (sprite._puppet) {
+	if ( sprite._puppet) {
+
+		debugC(3, kDebugLoading, "Frame::readSpriteD4(): sprite: %d - skipping the frame update because _puppet is set", spritePosition + 1);
 		stream.skip(size);
 		return;
 	}
