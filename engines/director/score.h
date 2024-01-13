@@ -146,6 +146,8 @@ private:
 	bool processImmediateFrameScript(Common::String s, int id);
 	bool processFrozenScripts();
 
+	void setCurFrameNumber(int newValue);
+
 public:
 	Common::Array<Channel *> _channels;
 	Common::SortedArray<Label *> *_labels;
