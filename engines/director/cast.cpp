@@ -1249,6 +1249,7 @@ void Cast::loadCastInfo(Common::SeekableReadStreamEndian &stream, uint16 id) {
 
 	// For SoundCastMember, read the flags in the CastInfo
 	if (_version >= kFileVer400 && _version < kFileVer600 && member->_type == kCastSound) {
+		debugC(4, kDebugLoading, "SoundCastMember id %s has flags 0x%08x Looping: %s",numToCastNum(id), castInfo.flags,castInfo.flags & 16 ? "No LOOP" : "LOOP");
 		((SoundCastMember *)member)->_looping = castInfo.flags & 16 ? 0 : 1;
 	} else if (_version >= kFileVer600 && member->_type == kCastSound) {
 		warning("STUB: Cast::loadCastInfo(): Sound cast member info not yet supported for version %d", _version);

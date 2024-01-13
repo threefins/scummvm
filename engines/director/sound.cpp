@@ -478,6 +478,7 @@ void DirectorSound::changingMovie() {
 }
 
 void DirectorSound::setLastPlayedSound(uint8 soundChannel, SoundID soundId, bool stopOnZero) {
+	debugC(5, kDebugSound, "DirectorSound::setLastPlayedSound() channel %d sound member Id %d", soundChannel, soundId.u.cast.member);
 	_channels[soundChannel]->lastPlayedSound = soundId;
 	_channels[soundChannel]->stopOnZero = stopOnZero;
 	_channels[soundChannel]->movieChanged = false;
@@ -494,6 +495,10 @@ bool DirectorSound::shouldStopOnZero(uint8 soundChannel) {
 void DirectorSound::stopSound(uint8 soundChannel) {
 	if (!assertChannel(soundChannel))
 		return;
+	if(isLastPlayedSound(soundChannel,SoundID())){
+		debugC(9, kDebugSound, "DirectorSound::stopSound(): not stopping channel %d sound as it is already stopped", soundChannel);
+		return;
+	}
 
 	debugC(5, kDebugSound, "DirectorSound::stopSound(): stopping channel %d", soundChannel);
 	if (_channels[soundChannel]->loopPtr)
