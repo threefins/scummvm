@@ -97,17 +97,17 @@ void SoundCastMember::load() {
 		_audio = audio;
 		_size = sndData->size();
 
+
 		if (_cast->_version < kFileVer400) {
 			debugC(9,kDebugLoading,"****** Loading id: %d Using audio loop bounds to determine looping as cast version %d is less than %d",sndId, _cast->_version, kFileVer400);
 			// Thelooping flag wasn't added to sound cast members until D4.
 			// In older versions, always loop sounds that contain a loop start and end.
 			_looping = audio->hasLoopBounds();
 		 }
-
-		if (_cast->_version >= kFileVer400 && _cast->_version < kFileVer600) {
+		else if ( _cast->_version < kFileVer600) {
 			debugC(9,kDebugLoading,"****** Loading id %d, processing cast info flags 0x%08x  to determine looping behaviour", sndId, castInfo->flags);
 			_looping = castInfo->flags & 16 ? 0 : 1;
-		} else if (_cast->_version >= kFileVer600) {
+		} else  {
 			warning("STUB: SoundCastMember::load() Sound cast member info not yet supported for version %d", _cast->_version);
 		}
 
