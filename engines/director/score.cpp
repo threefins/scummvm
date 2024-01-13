@@ -86,6 +86,7 @@ Score::Score(Movie *movie) {
 	_curFrameNumber = 0;
 	_framesStream = nullptr;
 	_currentFrame = nullptr;
+	_cachedFrameOffsets = Common::HashMap<uint16,uint>();
 }
 
 Score::~Score() {
@@ -1455,6 +1456,8 @@ void Score::loadFrames(Common::SeekableReadStreamEndian &stream, uint16 version)
 	// Prepare frameOffsets
 	_version = version;
 	_firstFramePosition = _framesStream->pos();
+	_cachedFrameOffsets = Common::HashMap<uint16,uint>();
+
 
 	// Pre-computing number of frames, as sometimes the frameNumber in stream mismatches
 	debugC(1, kDebugLoading, "Score::loadFrames(): Precomputing total number of frames!");
@@ -1475,25 +1478,37 @@ void Score::loadFrames(Common::SeekableReadStreamEndian &stream, uint16 version)
 
 bool Score::loadFrame(int frameNum, bool loadCast) {
 	debugC(7, kDebugLoading, "****** Frame request %d, current pos: %ld, current frame number: %d", frameNum, _framesStream->pos(), _curFrameNumber);
-
 	int sourceFrame = _curFrameNumber;
 	int targetFrame = frameNum;
+	if(targetFrame> 50 && _cachedFrameOffsets[targetFrame]>0){
+		uint cachedFrameOffset = _cachedFrameOffsets[targetFrame];
+		if(_framesStream->pos()!=cachedFrameOffset){
 
-	if (frameNum <= (int)_curFrameNumber) {
-		debugC(7, kDebugLoading, "****** Resetting frame %d to start %ld", sourceFrame, _framesStream->pos());
-		// If we are going back, we need to rebuild frames from start
-		_currentFrame->reset();
-		sourceFrame = 0;
+		debugC(7, kDebugLoading, "****** Seeking to cached frame offset for request %d, current pos: %ld, cached frame offset: %d", sourceFrame, _framesStream->pos(), cachedFrameOffset);
+		_framesStream->seek(cachedFrameOffset);
+		}
+	} else {
 
-		// Reset position to start
-		_framesStream->seek(_firstFramePosition);
+		if (frameNum <= (int)_curFrameNumber) {
+			// theoretically we shouldnt get here if we've called loadFrames first as that has a go at caching the offsets
+			debugC(7, kDebugLoading, "****** Resetting frame %d to start %ld", sourceFrame, _framesStream->pos());
+			// If we are going back, we need to rebuild frames from start
+			_currentFrame->reset();
+			sourceFrame = 0;
+
+			// Reset position to start
+			_framesStream->seek(_firstFramePosition);
+		}
+		debugC(7, kDebugLoading, "****** Source frame %d to Destination frame %d, current offset %ld", sourceFrame, targetFrame, _framesStream->pos());
+		while (sourceFrame < targetFrame - 1 && readOneFrame()) {
+			sourceFrame++;
+		}
+		// we know that the next frame is supposed to be the target frame so let's save that piece of information
+		debugC(7, kDebugLoading, "****** Adding frame %d and offset %ld to the cache", targetFrame, _framesStream->pos());
+		_cachedFrameOffsets[targetFrame] = _framesStream->pos();
 	}
 
-	debugC(7, kDebugLoading, "****** Source frame %d to Destination frame %d, current offset %ld", sourceFrame, targetFrame, _framesStream->pos());
 
-	while (sourceFrame < targetFrame - 1 && readOneFrame()) {
-		sourceFrame++;
-	}
 
 	// Finally read the target frame!
 	bool isFrameRead = readOneFrame();
@@ -1586,7 +1601,7 @@ void Score::setSpriteCasts() {
 	for (uint16 j = 0; j < _currentFrame->_sprites.size(); j++) {
 		_currentFrame->_sprites[j]->setCast(_currentFrame->_sprites[j]->_castId);
 
-		debugC(8, kDebugLoading, "Score::setSpriteCasts(): Frame: 0 Channel: %d castId: %s type: %d (%s)",
+		debugC(8, kDebugLoading, "Score::setSpriteCasts(): Frame: ?!? Channel: %d castId: %s type: %d (%s)",
 			 j, _currentFrame->_sprites[j]->_castId.asString().c_str(), _currentFrame->_sprites[j]->_spriteType,
 			spriteType2str(_currentFrame->_sprites[j]->_spriteType));
 	}

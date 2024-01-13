@@ -165,6 +165,8 @@ public:
 	CastMemberID _currentPaletteId;
 
 	uint _firstFramePosition;
+	Common::HashMap<uint16, uint> _cachedFrameOffsets;
+
 	uint _framesStreamSize;
 	Common::MemoryReadStreamEndian *_framesStream;
 
